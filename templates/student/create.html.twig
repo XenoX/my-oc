@@ -1,0 +1,31 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Mentoré·e·s</h1>
+    <p class="mb-1">Gestion de vos mentoré·e·s OpenClassrooms. <a href="{{ mentor_dashboard_url }}" target="_blank">Voir la liste de mes mentoré·e·s <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_student_index') }}">Liste des mentoré·e·s</a></p>
+
+    <div class="card shadow mb-4 border-bottom-info">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-info">Ajouter un·e mentoré·e</h6>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.idOC) }}
+            <p class="text-info text-xs text-right">Identifiant qui se trouve dans l'url du dashboard du mentoré·e (exemple 8730293)</p>
+            {{ form_row(form.name) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.funded) }}
+            {{ form_row(form.path) }}
+            {{ form_row(form.project) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>{{ include('student/include/_refresh-projects.js.twig') }}</script>
+{% endblock %}

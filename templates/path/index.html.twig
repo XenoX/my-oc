@@ -1,0 +1,54 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Parcours</h1>
+    <p class="mb-1">Gestion des parcours OpenClassrooms. <a href="{{ paths_url }}" target="_blank">Voir la liste des parcours <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_path_create') }}">Ajouter un parcours</a></p>
+
+    <div class="card shadow mb-4 border-bottom-secondary">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-secondary">Liste des parcours</h6>
+        </div>
+        <div class="card-body">
+            {% if paths %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Identifiant OC</th>
+                            <th>Nom</th>
+                            <th>Projets</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for path in paths %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path.link }}" target="_blank">
+                                        {{ path.idOC }} <sup><i class="fas fa-external-link-alt"></i></sup>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_path_read', {'idOC': path.idOC}) }}">
+                                        {{ path.name }}
+                                    </a>
+                                </td>
+                                <td>{{ path.projects|length }}</td>
+                                <td>
+                                    <a href="{{ path('app_path_delete', {'idOC': path.idOC }) }}" class="btn-circle btn-sm btn-danger"
+                                    onclick="return confirm('Êtes-vous certain de vouloir supprimer cet élément ?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-lg text-info mt-2">Aucun parcours pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

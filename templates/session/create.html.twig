@@ -1,0 +1,40 @@
+{% extends 'admin.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/jquery.datetimepicker.css') }}">
+{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Sessions</h1>
+    <p class="mb-1">Gestion des sessions. <a href="{{ mentor_dashboard_url }}" target="_blank">Voir la liste officielle des sessions <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_session_index') }}">Liste des sessions</a></p>
+
+    <div class="card shadow mb-4 border-bottom-success">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-success">Ajouter une session</h6>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.startAt) }}
+            {{ form_row(form.noShow) }}
+            {{ form_row(form.student) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/jquery.datetimepicker.full.js') }}"></script>
+    <script>
+      $('#session_startAt').datetimepicker({
+        format: 'd/m/Y',
+        formatDate: 'd/m/Y',
+        timepicker: false,
+        mask: '31/12/9999'
+      });
+    </script>
+{% endblock %}

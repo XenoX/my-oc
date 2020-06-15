@@ -1,0 +1,302 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    {% set maxSessionsByMonth = constant('App\\Entity\\Session::SESSIONS_BY_MONTH') %}
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{{ path('app_session_index') }}" class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Revenus du mois</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ earnings }} / {{ expectedEarnings }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-euro-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{{ path('app_session_index') }}" class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Sessions réalisées du mois</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ monthSessions|filter(s => not s.evaluation)|length }} / {{ expectedMonthSessions }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{{ path('app_evaluation_index') }}" class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Soutenances réalisées du mois</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ monthEvaluations|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-award fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{{ path('app_student_index') }}" class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Mentoré·e·s</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ studentsCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 border-bottom-primary">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Dashboard du mois</h6>
+        </div>
+        <div class="card-body">
+            {% for path in paths %}
+                {% if path.students is not empty %}
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="6" class="text-center">
+                                    <a href="{{ path('app_path_read', {'idOC': path.idOC}) }}">
+                                        {{ path.name }}
+                                    </a>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Mentoré·e</th>
+                                <th>Projet - Taux</th>
+                                <th>Sessions</th>
+                                <th>Soutenances</th>
+                                <th>No-shows</th>
+                                <th class="text-right">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for student in path.students %}
+                                {% set studentMonthSessions = monthSessions|filter(s => s.student is same as(student)) %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('app_student_read', {'id': student.id}) }}">
+                                            {{ student.name }}
+                                        </a>
+                                        <span class="text-gray-500">[{{ student.funded ? 'F' : 'AF' }}]</span>
+                                    </td>
+                                    <td>
+                                        [P{{ path.projectNumber(student.project) }}] {{ student.project.name }} - {{ student.project.rate }}
+                                    </td>
+                                    <td>
+                                        {{ studentMonthSessions|filter(s => not s.noShow and not s.evaluation)|length }}
+                                        <a href="{{ path('app_session_addsession', {'id': student.id}) }}" class="text-success">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{ studentMonthSessions|filter(s => s.evaluation)|length }}
+                                        <a href="{{ path('app_session_addevaluation', {'id': student.id}) }}" class="text-warning">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{ studentMonthSessions|filter(s => s.noShow)|length }}
+                                        <a href="{{ path('app_session_addsession', {'id': student.id, 'noShow': true}) }}" class="text-danger">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="{{ studentMonthSessions|length is same as(maxSessionsByMonth) ? 'text-success' : studentMonthSessions|length > maxSessionsByMonth ? 'text-danger' : 'text-primary' }}">
+                                            {{ studentMonthSessions|length }}
+                                        </span>
+                                        <span class="text-gray-500">/ {{ maxSessionsByMonth }}</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p class="text-center text-lg text-info mt-2">
+                    Bienvenue mentor !<br>
+                    Commence par ajouter tes <a href="{{ path('app_path_create') }}">parcours</a> ainsi que tes <a href="{{ path('app_student_create') }}">mentoré·e·s</a>.
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 border-bottom-primary">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Bilan financier du mois</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-4 col-md-12">
+                    <div class="table-responsive mb-2">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="4" class="text-center text-success">Financé·e·s</th>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% set foundedTotal = 0 %}
+                            {% for sessionLevel, rate in {1: 30, 2: 35, 3: 40} %}
+                                <tr>
+                                    {% set count = monthSessions|filter(s => not s.evaluation and not s.noShow and s.rate is same as(sessionLevel) and s.funded)|length %}
+                                    {% set total = count * rate %}
+                                    <td>Session de niveau {{ sessionLevel }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ rate }}</td>
+                                    <td>{{ total }}</td>
+                                    {% set foundedTotal = foundedTotal + total %}
+                                </tr>
+                            {% endfor %}
+                            {% for sessionLevel, rate in {1: 15, 2: 17.5, 3: 20} %}
+                                <tr>
+                                    {% set count = monthSessions|filter(s => not s.evaluation and s.noShow and s.rate is same as(sessionLevel) and s.funded)|length %}
+                                    {% set total = count * rate %}
+                                    <td>No-show de niveau {{ sessionLevel }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ rate }}</td>
+                                    <td>{{ total }}</td>
+                                    {% set foundedTotal = foundedTotal + total %}
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="2"><strong>Total</strong></td>
+                                <td colspan="2" class="text-primary text-right"><strong>{{ foundedTotal }} €</strong></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <div class="table-responsive mb-2">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="4" class="text-center text-success">Auto-Financé·e·s</th>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% set autoFoundedTotal = 0 %}
+                            {% for sessionLevel, rate in {1: 15, 2: 17.5, 3: 20} %}
+                                <tr>
+                                    {% set count = monthSessions|filter(s => not s.evaluation and not s.noShow and s.rate is same as(sessionLevel) and not s.funded)|length %}
+                                    {% set total = count * rate %}
+                                    <td>Session de niveau {{ sessionLevel }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ rate }}</td>
+                                    <td>{{ total }}</td>
+                                    {% set autoFoundedTotal = autoFoundedTotal + total %}
+                                </tr>
+                            {% endfor %}
+                            {% for sessionLevel, rate in {1: 7.5, 2: 8.75, 3: 10} %}
+                                <tr>
+                                    {% set count = monthSessions|filter(s => not s.evaluation and s.noShow and s.rate is same as(sessionLevel) and not s.funded)|length %}
+                                    {% set total = count * rate %}
+                                    <td>No-show de niveau {{ sessionLevel }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ rate }}</td>
+                                    <td>{{ total }}</td>
+                                    {% set autoFoundedTotal = autoFoundedTotal + total %}
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="3">Bonus (aide entre les sessions)</td>
+                                <td>{{ expectedBonus }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><strong>Total</strong></td>
+                                <td colspan="2" class="text-primary text-right"><strong>{{ autoFoundedTotal + expectedBonus }} €</strong></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <div class="table-responsive mb-2">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th colspan="4" class="text-center text-warning">Soutenances</th>
+                            </tr>
+                            <tr>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% set evaluationsTotal = 0 %}
+                            {% for sessionLevel, rate in {1: 30, 2: 35, 3: 40} %}
+                                <tr>
+                                    {% set count = monthEvaluations|filter(s => not s.noShow and s.rate is same as(sessionLevel))|length %}
+                                    {% set total = count * rate %}
+                                    <td>Soutenance de niveau {{ sessionLevel }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ rate }}</td>
+                                    <td>{{ total }}</td>
+                                    {% set evaluationsTotal = evaluationsTotal + total %}
+                                </tr>
+                            {% endfor %}
+                            {% for sessionLevel, rate in {1: 15, 2: 17.5, 3: 20} %}
+                                <tr>
+                                    {% set count = monthEvaluations|filter(s => s.noShow and s.rate is same as(sessionLevel))|length %}
+                                    {% set total = count * rate %}
+                                    <td>No-show de niveau {{ sessionLevel }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ rate }}</td>
+                                    <td>{{ total }}</td>
+                                    {% set evaluationsTotal = evaluationsTotal + total %}
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td colspan="2"><strong>Total</strong></td>
+                                <td colspan="2" class="text-primary text-right"><strong>{{ evaluationsTotal }} €</strong></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <p class="text-lg text-center text-primary">
+                        Total : {{ foundedTotal + autoFoundedTotal + expectedBonus + evaluationsTotal }} €
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

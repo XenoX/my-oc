@@ -1,0 +1,21 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Parcours</h1>
+    <p class="mb-1">Gestion des parcours OpenClassrooms. <a href="{{ paths_url }}" target="_blank">Voir la liste des parcours <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_path_index') }}">Liste des parcours</a></p>
+
+    <div class="card shadow mb-4 border-bottom-secondary">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-secondary">Ajouter un parcours</h6>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.idOC) }}
+            <p class="text-info text-xs text-right">Identifiant qui se trouve dans l'url du parcours (exemple 185 pour le parcours DW)</p>
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary">Envoyer</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

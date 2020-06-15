@@ -1,0 +1,36 @@
+{
+    "title": "My OC",
+    "name": "my-oc",
+    "version": "1.0.0",
+    "description": "An open source website to help mentors.",
+    "license": "MIT",
+    "author": "XenoX",
+    "contributors": [
+        "XenoX (@XenoX_)"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/XenoX/myoc.git"
+    },
+    "scripts": {
+        "gulp": "node_modules/.bin/gulp",
+        "watch": "node_modules/.bin/gulp watch"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "5.10.2",
+        "bootstrap": "4.3.1",
+        "jquery": "^3.5.1",
+        "jquery-datetimepicker": "^2.5.21"
+    },
+    "devDependencies": {
+        "del": "5.1.0",
+        "gulp": "4.0.2",
+        "gulp-autoprefixer": "7.0.0",
+        "gulp-clean-css": "4.2.0",
+        "gulp-plumber": "^1.2.1",
+        "gulp-rename": "1.4.0",
+        "gulp-sass": "4.0.2",
+        "gulp-uglify": "3.0.2",
+        "merge-stream": "2.0.0"
+    }
+}

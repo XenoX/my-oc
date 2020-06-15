@@ -1,0 +1,70 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Sessions</h1>
+    <p class="mb-1">Gestion des sessions. <a href="{{ mentor_dashboard_url }}" target="_blank">Voir la liste officielle des sessions <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_session_create') }}">Ajouter une session</a></p>
+
+    <div class="card shadow mb-4 border-bottom-success">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-success">Liste des sessions</h6>
+        </div>
+        <div class="card-body">
+            {% if sessions %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Mentoré·e</th>
+                            <th>Date</th>
+                            <th>[Parcours] Projet</th>
+                            <th>Taux - Durée</th>
+                            <th>Gain</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for session in sessions %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('app_student_read', {'id': session.student.id}) }}">
+                                        {{ session.student.name }}
+                                    </a>
+                                </td>
+                                <td>{{ session.startAt|date('d/m/Y') }}</td>
+                                <td>
+                                    <a href="{{ path('app_path_read', {'idOC': session.student.path.idOC}) }}">
+                                        [{{ session.student.path.name }}]
+                                    </a>
+                                    P{{ session.student.path.projectNumber(session.project) }} - {{ session.project.name }}
+                                </td>
+                                <td>
+                                    {% if session.evaluation %}
+                                        <span class="text-warning">0 - Soutenance</span>
+                                    {% elseif session.noShow %}
+                                        <span class="text-danger">{{ session.rate }} - No-show</span>
+                                    {% else %}
+                                        <span class="text-primary">{{ session.rate ~ ' - ' ~ session.duration|date('%i minutes') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ get_earn([session]) }} €</td>
+                                <td>
+                                    <a href="{{ path('app_session_update', {'id': session.id }) }}" class="btn-circle btn-sm btn-primary">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="{{ path('app_session_delete', {'id': session.id }) }}" class="btn-circle btn-sm btn-danger"
+                                       onclick="return confirm('Êtes-vous certain de vouloir supprimer cet élément ?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-lg text-info mt-2">Aucune session pour le {{ app.session.get('yearAndMonth')|date('m/Y') }}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

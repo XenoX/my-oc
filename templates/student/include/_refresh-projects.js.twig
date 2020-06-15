@@ -1,0 +1,27 @@
+let inputPath = document.getElementById('student_path');
+let inputProject = document.getElementById('student_project');
+
+inputPath.addEventListener('change', refreshProjects);
+refreshProjects();
+
+function refreshProjects() {
+  let pathId = inputPath.options[inputPath.selectedIndex].value;
+  let httpRequest = new XMLHttpRequest();
+
+  httpRequest.onreadystatechange = () => {
+    if (httpRequest.readyState !== XMLHttpRequest.DONE || httpRequest.status !== 200) {
+      return;
+    }
+
+    displayProjects(JSON.parse(httpRequest.responseText));
+  };
+
+  httpRequest.open('GET', Routing.generate('app_student_getprojectidsforpath', {'id': pathId}));
+  httpRequest.send();
+}
+
+function displayProjects(projectIds) {
+  [...inputProject.getElementsByTagName('option')].forEach(project => {
+    project.hidden = !projectIds.includes(project.value);
+  });
+}

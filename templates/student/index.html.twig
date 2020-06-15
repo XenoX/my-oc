@@ -1,0 +1,61 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Mentoré·e·s</h1>
+    <p class="mb-1">Gestion de vos mentoré·e·s OpenClassrooms. <a href="{{ mentor_dashboard_url }}" target="_blank">Voir la liste de mes mentoré·e·s <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_student_create') }}">Ajouter un·e mentoré·e</a></p>
+
+    <div class="card shadow mb-4 border-bottom-info">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-info">Liste des mentoré·e·s</h6>
+        </div>
+        <div class="card-body">
+            {% if students %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Financé</th>
+                            <th>Parcours</th>
+                            <th>[Taux] Projet</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('app_student_read', {'id': student.id}) }}">
+                                        {{ student.name }}
+                                    </a>
+                                </td>
+                                <td>{{ student.email }}</td>
+                                <td>{{ student.funded ? 'Tiers' : 'Auto' }}</td>
+                                <td>
+                                    <a href="{{ path('app_path_read', {'idOC': student.path.idOC}) }}">
+                                        {{ student.path.name }}
+                                    </a>
+                                </td>
+                                <td>[{{ student.project.rate }}] {{ student.project.name }}</td>
+                                <td>
+                                    <a href="{{ path('app_student_update', {'id': student.id }) }}" class="btn-circle btn-sm btn-primary">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="{{ path('app_student_delete', {'id': student.id }) }}" class="btn-circle btn-sm btn-danger"
+                                       onclick="return confirm('Êtes-vous certain de vouloir supprimer cet élément ?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-lg text-info mt-2">Aucun mentoré·e pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

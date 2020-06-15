@@ -1,0 +1,57 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Soutenances</h1>
+    <p class="mb-1">Gestion des soutenances. <a href="{{ mentor_dashboard_url }}" target="_blank">Voir la liste officielle des sessions <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_evaluation_create') }}">Ajouter une soutenance</a></p>
+
+    <div class="card shadow mb-4 border-bottom-warning">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-warning">Liste des soutenances</h6>
+        </div>
+        <div class="card-body">
+            {% if evaluations %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Projet</th>
+                            <th>Taux</th>
+                            <th>Gain</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for evaluation in evaluations %}
+                            <tr>
+                                <td>{{ evaluation.startAt|date('d/m/Y') }}</td>
+                                <td>{{ evaluation.project.name }}</td>
+                                <td>
+                                    {% if evaluation.noShow %}
+                                        <span class="text-danger">{{ evaluation.rate }} (No-show)</span>
+                                    {% else %}
+                                        <span class="text-primary">{{ evaluation.rate }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ get_earn([evaluation]) }} €</td>
+                                <td>
+                                    <a href="{{ path('app_evaluation_update', {'id': evaluation.id }) }}" class="btn-circle btn-sm btn-primary">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="{{ path('app_evaluation_delete', {'id': evaluation.id }) }}" class="btn-circle btn-sm btn-danger"
+                                       onclick="return confirm('Êtes-vous certain de vouloir supprimer cet élément ?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center text-lg text-info mt-2">Aucune soutenance pour le {{ app.session.get('yearAndMonth')|date('m/Y') }}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <body id="page-top">
+        <div id="wrapper">
+            <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+                <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ path('app_app_index') }}">
+                    <div class="sidebar-brand-icon rotate-n-15">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="sidebar-brand-text mx-3">My OC</div>
+                </a>
+
+                <hr class="sidebar-divider my-0">
+
+                <li class="nav-item {{ app.request.attributes.get('_route') is same as('app_app_index') ? 'active' }}">
+                    <a class="nav-link" href="{{ path('app_app_index') }}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <hr class="sidebar-divider">
+
+                <div class="sidebar-heading">Séances</div>
+
+                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_session_' ? 'active' }}">
+                    <a class="nav-link" href="{{ path('app_session_index') }}">
+                        <i class="fas fa-fw fa-user-clock"></i>
+                        <span>Sessions</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_evaluation_' ? 'active' }}">
+                    <a class="nav-link" href="{{ path('app_evaluation_index') }}">
+                        <i class="fas fa-fw fa-award"></i>
+                        <span>Soutenances</span>
+                    </a>
+                </li>
+
+                <hr class="sidebar-divider">
+
+                <div class="sidebar-heading">Ressources</div>
+
+                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_student_' ? 'active' }}">
+                    <a class="nav-link" href="{{ path('app_student_index') }}">
+                        <i class="fas fa-fw fa-user-graduate"></i>
+                        <span>Mentoré·e·s</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_path_' ? 'active' }}">
+                    <a class="nav-link" href="{{ path('app_path_index') }}">
+                        <i class="fas fa-fw fa-tasks"></i>
+                        <span>Parcours</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div id="content-wrapper" class="d-flex flex-column">
+                <div id="content">
+                    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                            <i class="fa fa-bars"></i>
+                        </button>
+
+                        <form class="d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                            <div class="input-group">
+                                <input type="month" id="monthSelector" class="form-control bg-light border-0" aria-label="Month"
+                                       value="{{ app.session.get('yearAndMonth')|default('now'|date('Y-m')) }}"
+                                       max="{{ 'now'|date('Y-m') }}"
+                                >
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" type="button" disabled>
+                                        <i class="fas fa-calendar-day fa-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </nav>
+                    <div class="container-fluid mt-4">
+                        {% for type, messages in app.flashes() %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                        {% block body %}{% endblock %}
+                    </div>
+                </div>
+
+                <footer class="sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Copyright &copy; My OC {{ 'now'|date('Y') }}</span>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+    </body>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+      let inputMonth = document.getElementById('monthSelector');
+
+      inputMonth.addEventListener('change', setMonth);
+
+      function setMonth() {
+        let monthValue = inputMonth.value;
+        let httpRequest = new XMLHttpRequest();
+
+        httpRequest.onreadystatechange = () => {
+          if (httpRequest.readyState !== XMLHttpRequest.DONE || httpRequest.status !== 200) {
+            return;
+          }
+
+          document.location.reload(true);
+        };
+
+        httpRequest.open('GET', Routing.generate('app_app_month', {'yearAndMonth': monthValue}));
+        httpRequest.send();
+      }
+    </script>
+{% endblock %}

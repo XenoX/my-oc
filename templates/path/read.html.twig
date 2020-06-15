@@ -1,0 +1,87 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Parcours</h1>
+    <p class="mb-1">Gestion des parcours OpenClassrooms. <a href="{{ paths_url }}" target="_blank">Voir la liste des parcours <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_path_index') }}">Liste des parcours</a></p>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow mb-4 border-bottom-secondary">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-secondary">Détails</h6>
+                </div>
+                <div class="card-body">
+                    <img src="{{ path.image }}" alt="image du parcours" class="w-100 mb-3">
+                    <p class="text-lg text-center">
+                        <a href="{{ path.link }}" target="_blank">
+                            <img src="{{ asset('img/flag-' ~ path.language ~ '.png') }}"  alt="flag">
+                            {{ path.name }} <sup><i class="fas fa-external-link-alt"></i></sup>
+                        </a>
+                    </p>
+                    <p class="text-sm-center">
+                        <i class="fas fa-stopwatch"></i> {{ path.duration|date('%M mois')|trim(characterMask='0', side='left') }}
+                    </p>
+                    {% if path.students|length > 0 %}
+                        <p>Sur ce parcours :<br>
+                        <span class="text-justify">
+                            {% for student in path.students %}
+                                <a href="{{ path('app_student_read', {'id': student.id}) }}">
+                                    {{ student.name }}{{ not loop.last ? ', ' }}
+                                </a>
+                            {% endfor %}
+                        </span>
+                    {% endif %}
+                    <p class="text-justify">{{ path.description|raw }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card shadow mb-4 border-bottom-secondary">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-secondary">Projets</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Taux</th>
+                                <th>Durée</th>
+                                <th>Validation</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for project in path.projects %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ project.link }}" target="_blank">
+                                            {{ project.name }} <sup><i class="fas fa-external-link-alt"></i></sup>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if project.rate > 1 %}
+                                            <a href="{{ path('app_project_changerate', {'id': project.id, 'direction': 'down'}) }}" class="badge badge-info">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </a>
+                                        {% endif %}
+                                        {{ project.rate }}
+                                        {% if project.rate < 3 %}
+                                            <a href="{{ path('app_project_changerate', {'id': project.id, 'direction': 'up'}) }}" class="badge badge-info">
+                                                <i class="fas fa-chevron-up"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ project.duration|date('%H heures')|trim(characterMask='0', side='left') }}</td>
+                                    <td>{{ project.evaluation }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Mentoré·e·s</h1>
+    <p class="mb-1">Gestion de vos mentoré·e·s OpenClassrooms. <a href="{{ mentor_dashboard_url }}" target="_blank">Voir la liste de mes mentoré·e·s <sup><i class="fas fa-external-link-alt"></i></sup></a></p>
+    <p class="mb-4"><a href="{{ path('app_student_index') }}">Liste des mentoré·e·s</a></p>
+
+    <div class="card shadow mb-4 border-bottom-info">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-info">Dashboard d'un·e mentoré·e</h6>
+        </div>
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-3 text-lg">
+                    <a href="{{ student_dashboard_url|replace({'{idOC}': student.idOC}) }}" target="_blank">
+                        {{ student.name }} <sup><i class="fas fa-external-link-alt"></i></sup>
+                    </a>
+                </div>
+                <div class="col-md-3 text-lg">
+                    <a href="mailto:{{ student.email }}">{{ student.email }}</a>
+                </div>
+                <div class="col-md-3 text-lg text-right">
+                    <i class="fas fa-euro-sign"></i> {{ student.funded ? 'Financé·e par un tiers' : 'Auto-financé·e' }}
+                </div>
+                <div class="col-md-3 text-right">
+                    <a href="{{ path('app_student_update', {'id': student.id}) }}" class="btn btn-sm btn-secondary">
+                        Modifier
+                    </a>
+                </div>
+            </div>
+            <hr>
+            <div class="mt-4 table-responsive">
+                {% if sessions|length > 0 %}
+                    <table class="table table-sm table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th colspan="4" class="text-center">Sessions du mois</th>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <th>Projet</th>
+                            <th>Taux - Durée</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for session in sessions %}
+                            <tr>
+                                <td>{{ session.startAt|date('d/m/Y') }}</td>
+                                <td>
+                                    [P{{ session.student.path.projectNumber(session.project) }}] {{ session.project.name }}
+                                </td>
+                                <td>
+                                    {% if session.evaluation %}
+                                        <span class="text-warning">0 - Soutenance</span>
+                                    {% elseif session.noShow %}
+                                        <span class="text-danger">{{ session.rate }} - No-show</span>
+                                    {% else %}
+                                        <span class="text-primary">{{ session.rate ~ ' - ' ~ session.duration|date('%i minutes') }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_session_update', {'id': session.id }) }}" class="btn-circle btn-sm btn-primary">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="{{ path('app_session_delete', {'id': session.id }) }}" class="btn-circle btn-sm btn-danger"
+                                       onclick="return confirm('Êtes-vous certain de vouloir supprimer cet élément ?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 table-responsive">
+                <table class="table table-sm table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th colspan="3" class="text-center">
+                            <a href="{{ path('app_path_read', {'idOC': student.path.idOC}) }}">
+                                {{ student.path.name }}
+                            </a>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Taux</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in student.path.projects %}
+                        <tr>
+                            <td>
+                                P{{ loop.index }} -
+                                <a href="{{ project.link }}" target="_blank">
+                                    {{ project.name }} <sup><i class="fas fa-external-link-alt"></i></sup>
+                                </a>
+                                <span class="text-gray-500">{{ project.id is same as(student.project.id) ? '(Projet en cours)' }}</span>
+                            </td>
+                            <td>
+                                {% if project.rate > 1 %}
+                                    <a href="{{ path('app_project_changerate', {'id': project.id, 'direction': 'down'}) }}" class="badge badge-info">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </a>
+                                {% endif %}
+                                {{ project.rate }}
+                                {% if project.rate < 3 %}
+                                    <a href="{{ path('app_project_changerate', {'id': project.id, 'direction': 'up'}) }}" class="badge badge-info">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if project.id is not same as(student.project.id) %}
+                                    <a href="{{ path('app_student_selectproject', {'id': student.id, 'idProject': project.id}) }}" class="btn btn-sm btn-circle btn-primary" title="Passer en projet en cours">
+                                        <i class="fas fa-user-circle"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
