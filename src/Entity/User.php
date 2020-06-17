@@ -3,11 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields={"email"}, message="Il existe déjà un compte avec cet email")
  */
 class User implements UserInterface
 {
@@ -45,9 +49,26 @@ class User implements UserInterface
     private $token;
 
     /**
+     * @ORM\OneToMany(targetEntity=Student::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $students;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Path::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $paths;
+
+    /**
      * User constructor.
      */
     public function __construct()
+    {
+        $this->generateNewToken();
+        $this->students = new ArrayCollection();
+        $this->paths = new ArrayCollection();
+    }
+
+    public function generateNewToken(): void
     {
         $this->token = md5(uniqid('myoc_', true));
     }
@@ -103,7 +124,7 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getUsername(): string
+    public function getUsername(): ?string
     {
         return $this->username;
     }
@@ -142,5 +163,67 @@ class User implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection|Student[]
+     */
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
+    public function addStudent(Student $student): self
+    {
+        if (!$this->students->contains($student)) {
+            $this->students[] = $student;
+            $student->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStudent(Student $student): self
+    {
+        if ($this->students->contains($student)) {
+            $this->students->removeElement($student);
+            // set the owning side to null (unless already changed)
+            if ($student->getUser() === $this) {
+                $student->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Path[]
+     */
+    public function getPaths(): Collection
+    {
+        return $this->paths;
+    }
+
+    public function addPath(Path $path): self
+    {
+        if (!$this->paths->contains($path)) {
+            $this->paths[] = $path;
+            $path->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePath(Path $path): self
+    {
+        if ($this->paths->contains($path)) {
+            $this->paths->removeElement($path);
+            // set the owning side to null (unless already changed)
+            if ($path->getUser() === $this) {
+                $path->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

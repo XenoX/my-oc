@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\Path;
 use App\Entity\Project;
 use App\Repository\ProjectRepository;
 use DateInterval;
@@ -15,11 +16,6 @@ use Exception;
 class ProjectService
 {
     /**
-     * @var ProjectRepository
-     */
-    private $projectRepository;
-
-    /**
      * @var RateService
      */
     private $rateService;
@@ -29,20 +25,10 @@ class ProjectService
      */
     public function __construct(ProjectRepository $projectRepository, RateService $rateService)
     {
-        $this->projectRepository = $projectRepository;
         $this->rateService = $rateService;
     }
 
-    public function createOrUpdate(array $projectData, string $pathName): Project
-    {
-        return $this->hydrate(
-            $this->projectRepository->findOneBy(['idOC' => $projectData['id']]) ?? new Project(),
-            $projectData,
-            $pathName
-        );
-    }
-
-    private function hydrate(Project $project, array $projectData, string $pathName): Project
+    public function hydrate(array $projectData, Path $path): Project
     {
         try {
             $dateInterval = new DateInterval($projectData['duration']);
@@ -50,7 +36,7 @@ class ProjectService
             $dateInterval = new DateInterval('PT20H');
         }
 
-        return $project
+        return (new Project())
             ->setIdOC($projectData['id'])
             ->setName($projectData['title'])
             ->setDescription($projectData['shortDescription'])
@@ -58,7 +44,8 @@ class ProjectService
             ->setLanguage($projectData['language'])
             ->setEvaluation($projectData['evaluatorType'])
             ->setLink($projectData['OpenClassroomsUrl'])
-            ->setRate($this->rateService->getRateForPathAndProject($pathName, $projectData['title']))
+            ->setRate($this->rateService->getRateForPathAndProject($path->getName(), $projectData['title']))
+            ->setPath($path)
         ;
     }
 }

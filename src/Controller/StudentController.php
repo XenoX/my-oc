@@ -9,6 +9,7 @@ use App\Entity\Project;
 use App\Entity\Student;
 use App\Form\StudentType;
 use App\Repository\StudentRepository;
+use App\Security\Voter\AppVoter;
 use App\Service\StudentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,7 +33,9 @@ class StudentController extends AbstractController
      */
     public function index(StudentRepository $studentRepository): Response
     {
-        return $this->render('student/index.html.twig', ['students' => $studentRepository->findAll()]);
+        return $this->render('student/index.html.twig', [
+            'students' => $studentRepository->findBy(['user' => $this->getUser()]),
+        ]);
     }
 
     /**
@@ -63,6 +66,8 @@ class StudentController extends AbstractController
      */
     public function read(SessionInterface $session, Student $student): Response
     {
+        $this->denyAccessUnlessGranted(AppVoter::VIEW, $student);
+
         return $this->render('student/read.html.twig', [
             'sessions' => $student->getMonthSessions($session->get('yearAndMonth', (new \DateTime())->format('Y-m'))),
             'student' => $student,
@@ -74,6 +79,8 @@ class StudentController extends AbstractController
      */
     public function update(Request $request, Session $session, Student $student): Response
     {
+        $this->denyAccessUnlessGranted(AppVoter::UPDATE, $student);
+
         $form = $this->createForm(StudentType::class, $student);
 
         $form->handleRequest($request);
@@ -93,6 +100,8 @@ class StudentController extends AbstractController
      */
     public function delete(StudentService $studentService, Session $session, Student $student): RedirectResponse
     {
+        $this->denyAccessUnlessGranted(AppVoter::DELETE, $student);
+
         $studentService->delete($student);
 
         $this->getDoctrine()->getManager()->flush();
@@ -107,6 +116,8 @@ class StudentController extends AbstractController
      */
     public function selectProject(EntityManagerInterface $em, Session $session, Student $student, int $idProject): RedirectResponse
     {
+        $this->denyAccessUnlessGranted(AppVoter::UPDATE, $student);
+
         if (!$project = $em->getRepository(Project::class)->find($idProject)) {
             return $this->redirectToRoute('app_student_read', ['id' => $student->getId()]);
         }

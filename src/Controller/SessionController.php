@@ -8,6 +8,7 @@ use App\Entity\Session;
 use App\Entity\Student;
 use App\Form\SessionType;
 use App\Repository\SessionRepository;
+use App\Security\Voter\AppVoter;
 use App\Service\SessionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,7 +32,8 @@ class SessionController extends AbstractController
     {
         return $this->render('session/index.html.twig', [
             'sessions' => $sessionRepository->findByMonth(
-                $session->get('yearAndMonth', (new DateTime())->format('Y-m'))
+                $session->get('yearAndMonth', (new DateTime())->format('Y-m')),
+                $this->getUser()
             ),
         ]);
     }
@@ -62,6 +64,8 @@ class SessionController extends AbstractController
      */
     public function update(Request $request, SessionService $sessionService, EntityManagerInterface $manager, HttpSession $httpSession, Session $session): Response
     {
+        $this->denyAccessUnlessGranted(AppVoter::UPDATE, $session);
+
         $form = $this->createForm(SessionType::class, $session);
 
         $form->handleRequest($request);
@@ -83,6 +87,8 @@ class SessionController extends AbstractController
      */
     public function delete(Request $request, SessionService $sessionService, HttpSession $httpSession, Session $session): RedirectResponse
     {
+        $this->denyAccessUnlessGranted(AppVoter::DELETE, $session);
+
         $sessionService->delete($session);
 
         $this->getDoctrine()->getManager()->flush();

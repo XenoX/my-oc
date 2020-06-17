@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Path;
-use App\Entity\Project;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -13,14 +13,17 @@ class PathFixtures extends Fixture implements DependentFixtureInterface
     public function getDependencies(): array
     {
         return [
-            ProjectFixtures::class,
+            UserFixtures::class,
         ];
     }
 
     public function load(ObjectManager $manager): void
     {
+        /** @var User $user */
+        $user = $this->getReference('user');
+
         foreach ($this->getData() as $data) {
-            $object = (new Path())
+            $path = (new Path())
                 ->setIdOC($data[0])
                 ->setName($data[1])
                 ->setDescription('Fixture description.')
@@ -28,21 +31,14 @@ class PathFixtures extends Fixture implements DependentFixtureInterface
                 ->setDuration(new \DateInterval('P12M'))
                 ->setLanguage('fr')
                 ->setLink('https://openclassrooms.com/fr/paths/'.$data[0])
+                ->setUser($user)
             ;
 
-            if (isset($data[2])) {
-                foreach ($data[2] as $projectId) {
-                    /** @var Project $project */
-                    $project = $this->getReference($projectId);
+            $user->addPath($path);
 
-                    $object->addProject($project);
-                    $project->addPath($object);
-                }
-            }
+            $manager->persist($path);
 
-            $manager->persist($object);
-
-            $this->setReference($data[0], $object);
+            $this->setReference($data[0], $path);
         }
 
         $manager->flush();
@@ -51,9 +47,9 @@ class PathFixtures extends Fixture implements DependentFixtureInterface
     private function getData(): array
     {
         return [
-            [185, 'Développeur Web', [746, 639, 637, 638, 675, 676, 677]],
-            [68, 'Développeur d\'application - Python', [746, 639, 637, 638, 675, 676, 677]],
-            [173, 'Commercial - Chargé d\'affaires', [746, 639, 637, 638, 675, 676, 677]],
+            [185, 'Développeur Web'],
+            [68, 'Développeur d\'application - Python'],
+            [173, 'Commercial - Chargé d\'affaires'],
             [65, 'Data Analyst'],
             [84, 'Community Manager'],
             [169, 'Développeur Salesforce'],

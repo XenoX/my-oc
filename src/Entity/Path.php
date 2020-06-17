@@ -9,6 +9,7 @@ use DateInterval;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=PathRepository::class)
@@ -23,7 +24,7 @@ class Path
     private $id;
 
     /**
-     * @ORM\Column(type="integer", unique=true)
+     * @ORM\Column(type="integer")
      */
     private $idOC;
 
@@ -63,7 +64,13 @@ class Path
     private $students;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Project::class, inversedBy="paths", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="paths")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Project::class, mappedBy="path", cascade={"persist"}, orphanRemoval=true)
      */
     private $projects;
 
@@ -193,6 +200,18 @@ class Path
         return $this;
     }
 
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?UserInterface $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
     /**
      * @return Collection|Project[]
      */
@@ -210,6 +229,7 @@ class Path
     {
         if (!$this->projects->contains($project)) {
             $this->projects[] = $project;
+            $project->setPath($this);
         }
 
         return $this;
@@ -219,6 +239,10 @@ class Path
     {
         if ($this->projects->contains($project)) {
             $this->projects->removeElement($project);
+            // set the owning side to null (unless already changed)
+            if ($project->getPath() === $this) {
+                $project->setPath(null);
+            }
         }
 
         return $this;

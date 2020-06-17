@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Evaluation;
 use App\Form\EvaluationType;
 use App\Repository\EvaluationRepository;
+use App\Security\Voter\AppVoter;
 use App\Service\EvaluationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +30,8 @@ class EvaluationController extends AbstractController
     {
         return $this->render('evaluation/index.html.twig', [
             'evaluations' => $evaluationRepository->findByMonth(
-                $session->get('yearAndMonth', (new \DateTime())->format('Y-m'))
+                $session->get('yearAndMonth', (new \DateTime())->format('Y-m')),
+                $this->getUser()
             ),
         ]);
     }
@@ -60,6 +62,8 @@ class EvaluationController extends AbstractController
      */
     public function update(Request $request, EvaluationService $evaluationService, EntityManagerInterface $manager, HttpSession $httpSession, Evaluation $evaluation): Response
     {
+        $this->denyAccessUnlessGranted(AppVoter::UPDATE, $evaluation);
+
         $form = $this->createForm(EvaluationType::class, $evaluation);
 
         $form->handleRequest($request);
@@ -81,6 +85,8 @@ class EvaluationController extends AbstractController
      */
     public function delete(EvaluationService $evaluationService, HttpSession $httpSession, Evaluation $evaluation): RedirectResponse
     {
+        $this->denyAccessUnlessGranted(AppVoter::DELETE, $evaluation);
+
         $evaluationService->delete($evaluation);
 
         $this->getDoctrine()->getManager()->flush();

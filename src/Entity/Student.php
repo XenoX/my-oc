@@ -8,6 +8,7 @@ use App\Repository\StudentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=StudentRepository::class)
@@ -57,6 +58,12 @@ class Student
      * @ORM\OneToMany(targetEntity=Session::class, mappedBy="student", orphanRemoval=true)
      */
     private $sessions;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="students")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     public function __construct()
     {
@@ -185,6 +192,18 @@ class Student
                 $session->setStudent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?UserInterface $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

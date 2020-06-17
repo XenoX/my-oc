@@ -55,6 +55,15 @@
                         <span>Parcours</span>
                     </a>
                 </li>
+
+                <div class="sidebar-heading">Compte</div>
+
+                <li class="nav-item {{ app.request.attributes.get('_route') starts with 'app_user_' ? 'active' }}">
+                    <a class="nav-link" href="{{ path('app_user_profile') }}">
+                        <i class="fas fa-fw fa-user-cog"></i>
+                        <span>Préférences</span>
+                    </a>
+                </li>
             </ul>
 
             <div id="content-wrapper" class="d-flex flex-column">
@@ -77,6 +86,19 @@
                                 </div>
                             </div>
                         </form>
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <div class="nav-link">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-800 small">{{ app.user.username }}</span>
+                                </div>
+                            </li>
+                            <div class="topbar-divider d-none d-sm-block"></div>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_security_logout') }}">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">Se déconnecter</span>
+                                </a>
+                            </li>
+                        </ul>
                     </nav>
                     <div class="container-fluid mt-4">
                         {% for type, messages in app.flashes() %}

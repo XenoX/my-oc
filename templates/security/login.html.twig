@@ -7,6 +7,16 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-xl-10 col-lg-12 col-md-9">
+                    {% for type, messages in app.flashes() %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ type }} alert-dismissible fade show mt-5" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
                     <div class="card o-hidden border-0 shadow-lg my-5">
                         <div class="card-body p-0">
                             <div class="row">
@@ -14,7 +24,7 @@
                                 <div class="col-lg-6">
                                     <div class="p-5">
                                         <div class="text-center">
-                                            <h1 class="h4 text-gray-900 mb-4">My OC - Connexion</h1>
+                                            <h1 class="h4 text-gray-900 mb-4">Connexion</h1>
                                         </div>
                                         {% if error %}
                                             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
@@ -34,15 +44,15 @@
                                             </div>
                                             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
                                             <button type="submit" class="btn btn-primary btn-user btn-block">
-                                                Login
+                                                Me connecter
                                             </button>
                                         </form>
                                         <hr>
                                         <div class="text-center">
-                                            <a class="small" href="forgot-password.html">Mot de passe oublié ?</a>
+                                            <a class="small" href="{{ path('app_security_forgotpassword') }}">Mot de passe oublié ?</a>
                                         </div>
                                         <div class="text-center">
-                                            <a class="small" href="register.html">Créer un compte</a>
+                                            <a class="small" href="{{ path('app_registration_register') }}">Créer un compte</a>
                                         </div>
                                     </div>
                                 </div>

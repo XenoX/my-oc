@@ -9,6 +9,7 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=SessionRepository::class)
@@ -67,6 +68,12 @@ class Session implements MeetingInterface
      * @ORM\JoinColumn(nullable=false)
      */
     private $project;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     /**
      * Session constructor.
@@ -176,6 +183,18 @@ class Session implements MeetingInterface
     public function setProject(?Project $project): self
     {
         $this->project = $project;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?UserInterface $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
