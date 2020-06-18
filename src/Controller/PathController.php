@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Path;
 use App\Form\PathType;
 use App\Repository\PathRepository;
+use App\Security\Voter\AppVoter;
 use App\Service\OCApiClient;
 use App\Service\PathService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,7 +30,7 @@ class PathController extends AbstractController
      */
     public function index(PathRepository $pathRepository): Response
     {
-        return $this->render('path/index.html.twig', ['paths' => $pathRepository->findAll()]);
+        return $this->render('path/index.html.twig', ['paths' => $pathRepository->findBy(['user' => $this->getUser()])]);
     }
 
     /**
@@ -48,32 +49,37 @@ class PathController extends AbstractController
                 return $this->redirectToRoute('app_path_index');
             }
 
-            $manager->persist($pathService->createOrUpdate($pathData));
+            $path = $pathService->createOrUpdate($pathData);
+            $manager->persist($path);
             $manager->flush();
 
             $flashBag = $httpSession->getFlashBag();
             $flashBag->add('success', 'Parcours ajouté avec succès !');
             $flashBag->add('warning', 'Merci de vérifier que les niveaux (taux) des projets sont corrects');
 
-            return $this->redirectToRoute('app_path_read', ['idOC' => $path->getIdOC()]);
+            return $this->redirectToRoute('app_path_read', ['id' => $path->getId()]);
         }
 
         return $this->render('path/create.html.twig', ['form' => $form->createView()]);
     }
 
     /**
-     * @Route("/read/{idOC}")
+     * @Route("/read/{id}")
      */
     public function read(Path $path): Response
     {
+        $this->denyAccessUnlessGranted(AppVoter::VIEW, $path);
+
         return $this->render('path/read.html.twig', ['path' => $path]);
     }
 
     /**
-     * @Route("/delete/{idOC}")
+     * @Route("/delete/{id}")
      */
     public function delete(HttpSession $httpSession, PathService $pathService, Path $path): RedirectResponse
     {
+        $this->denyAccessUnlessGranted(AppVoter::DELETE, $path);
+
         $pathService->delete($path);
 
         $this->getDoctrine()->getManager()->flush();

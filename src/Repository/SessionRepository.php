@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Session;
-use App\Entity\Student;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @method Session|null find($id, $lockMode = null, $lockVersion = null)
@@ -26,7 +26,7 @@ class SessionRepository extends ServiceEntityRepository
         parent::__construct($registry, Session::class);
     }
 
-    public function findByMonth(string $yearAndMonth, ?Student $student = null, bool $withEvaluation = true): array
+    public function findByMonth(string $yearAndMonth, ?UserInterface $user = null): array
     {
         try {
             $startDate = new DateTime(sprintf('%s-01 00:00:00', $yearAndMonth));
@@ -42,21 +42,20 @@ class SessionRepository extends ServiceEntityRepository
 
         $params = ['startDate' => $startDate, 'endDate' => $endDate];
 
-        if ($student) {
-            $monthSessions->andWhere('session.student = :student');
-            $params = array_merge($params, ['student' => $student]);
+        if ($user) {
+            $monthSessions->andWhere('session.user = :user');
+            $params = array_merge($params, ['user' => $user]);
         }
 
-        if (!$withEvaluation) {
-            $monthSessions->andWhere('session.evaluation = 0');
-        }
-
-        $monthSessions->setParameters($params);
+        $monthSessions
+            ->setParameters($params)
+            ->orderBy('session.id', 'DESC')
+        ;
 
         return $monthSessions->getQuery()->getResult();
     }
 
-    public function countEvalForMonth(string $yearAndMonth): int
+    public function countEvalForMonth(string $yearAndMonth, ?UserInterface $user = null): int
     {
         try {
             $startDate = new DateTime(sprintf('%s-01 00:00:00', $yearAndMonth));
@@ -69,8 +68,16 @@ class SessionRepository extends ServiceEntityRepository
             ->select('COUNT(session.id)')
             ->where('session.startAt BETWEEN :startDate AND :endDate')
             ->andWhere('session.evaluation = 1')
-            ->setParameters(['startDate' => $startDate, 'endDate' => $endDate])
         ;
+
+        $params = ['startDate' => $startDate, 'endDate' => $endDate];
+
+        if ($user) {
+            $monthEvaluationsCount->andWhere('session.user = :user');
+            $params = array_merge($params, ['user' => $user]);
+        }
+
+        $monthEvaluationsCount->setParameters($params);
 
         try {
             return (int) $monthEvaluationsCount->getQuery()->getSingleScalarResult();

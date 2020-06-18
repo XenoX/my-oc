@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Path;
+use App\Entity\User;
 use DateInterval;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Component\Security\Core\Security;
 
 /**
  * Class PathService.
@@ -25,26 +27,35 @@ class PathService
     private $projectService;
 
     /**
+     * @var Security
+     */
+    private $security;
+
+    /**
      * PathService constructor.
      */
-    public function __construct(EntityManagerInterface $manager, ProjectService $projectService)
+    public function __construct(EntityManagerInterface $manager, ProjectService $projectService, Security $security)
     {
         $this->manager = $manager;
         $this->projectService = $projectService;
+        $this->security = $security;
     }
 
     public function createOrUpdate(array $pathData): Path
     {
         return $this->hydrate(
-            $this->manager->getRepository(Path::class)->findOneBy(['idOC' => $pathData['id']]) ?? new Path(),
+            $this->manager->getRepository(Path::class)->findOneBy([
+                'idOC' => $pathData['id'],
+                'user' => $this->security->getUser(),
+            ]) ?? new Path(),
             $pathData
         );
     }
 
     public function delete(Path $path): void
     {
-        foreach ($path->getProjects() as $project) {
-            $project->removePath($path);
+        if ($user = $path->getUser()) {
+            $user->removePath($path);
         }
 
         $this->manager->remove($path);
@@ -58,6 +69,9 @@ class PathService
             $dateInterval = new DateInterval('P12M');
         }
 
+        /** @var User $user */
+        $user = $this->security->getUser();
+
         $path
             ->setIdOC($pathData['id'])
             ->setName($pathData['title'])
@@ -66,13 +80,13 @@ class PathService
             ->setDuration($dateInterval)
             ->setLanguage($pathData['language'])
             ->setLink($pathData['OpenClassroomsUrl'])
+            ->setUser($user)
         ;
 
-        foreach ($pathData['projects'] as $project) {
-            $project = $this->projectService->createOrUpdate($project, $path->getName());
+        foreach ($pathData['projects'] as $projectData) {
+            $project = $this->projectService->hydrate($projectData, $path);
 
             $path->addProject($project);
-            $project->addPath($path);
         }
 
         return $path;

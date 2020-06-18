@@ -9,6 +9,7 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @method Evaluation|null find($id, $lockMode = null, $lockVersion = null)
@@ -23,7 +24,7 @@ class EvaluationRepository extends ServiceEntityRepository
         parent::__construct($registry, Evaluation::class);
     }
 
-    public function findByMonth(string $yearAndMonth): array
+    public function findByMonth(string $yearAndMonth, ?UserInterface $user = null): array
     {
         try {
             $startDate = new DateTime(sprintf('%s-01 00:00:00', $yearAndMonth));
@@ -34,7 +35,17 @@ class EvaluationRepository extends ServiceEntityRepository
 
         $monthEvaluations = $this->createQueryBuilder('evaluation')
             ->where('evaluation.startAt BETWEEN :startDate AND :endDate')
-            ->setParameters(['startDate' => $startDate, 'endDate' => $endDate])
+        ;
+
+        $params = ['startDate' => $startDate, 'endDate' => $endDate];
+
+        if ($user) {
+            $monthEvaluations->andWhere('evaluation.user = :user');
+            $params = array_merge($params, ['user' => $user]);
+        }
+
+        $monthEvaluations
+            ->setParameters($params)
             ->orderBy('evaluation.id', 'DESC')
         ;
 

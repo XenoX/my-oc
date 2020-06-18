@@ -28,18 +28,19 @@ class AppController extends AbstractController
     public function index(SessionInterface $session, EntityManagerInterface $em, EarningService $earningService): Response
     {
         $yearAndMonth = $session->get('yearAndMonth', (new DateTime())->format('Y-m'));
+        $user = $this->getUser();
 
         $sessionRepository = $em->getRepository(Session::class);
-        $monthSessions = $sessionRepository->findByMonth($yearAndMonth);
-        $monthEvaluations = $em->getRepository(Evaluation::class)->findByMonth($yearAndMonth);
-        $expectedBonus = $earningService->getExpectedBonus();
-        $studentsCount = $em->getRepository(Student::class)->count([]);
+        $monthSessions = $sessionRepository->findByMonth($yearAndMonth, $user);
+        $monthEvaluations = $em->getRepository(Evaluation::class)->findByMonth($yearAndMonth, $user);
+        $expectedBonus = $earningService->getExpectedBonus($user);
+        $studentsCount = $em->getRepository(Student::class)->count(['user' => $user]);
 
         return $this->render('app/index.html.twig', [
-            'expectedMonthSessions' => $studentsCount * Session::SESSIONS_BY_MONTH - $sessionRepository->countEvalForMonth($yearAndMonth),
+            'expectedMonthSessions' => $studentsCount * Session::SESSIONS_BY_MONTH - $sessionRepository->countEvalForMonth($yearAndMonth, $user),
             'earnings' => $earningService->getEarnsForMeetings(array_merge($monthSessions, $monthEvaluations)) + $expectedBonus,
-            'expectedEarnings' => $earningService->getExpectedEarnsForMonth($yearAndMonth) + $expectedBonus,
-            'paths' => $em->getRepository(Path::class)->findAll(),
+            'expectedEarnings' => $earningService->getExpectedEarnsForMonth($yearAndMonth, $user) + $expectedBonus,
+            'paths' => $em->getRepository(Path::class)->findBy(['user' => $user]),
             'monthEvaluations' => $monthEvaluations,
             'monthSessions' => $monthSessions,
             'expectedBonus' => $expectedBonus,

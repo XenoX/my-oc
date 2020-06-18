@@ -33,7 +33,7 @@
                                 </td>
                                 <td>{{ session.startAt|date('d/m/Y') }}</td>
                                 <td>
-                                    <a href="{{ path('app_path_read', {'idOC': session.student.path.idOC}) }}">
+                                    <a href="{{ path('app_path_read', {'id': session.student.path.id}) }}">
                                         [{{ session.student.path.name }}]
                                     </a>
                                     P{{ session.student.path.projectNumber(session.project) }} - {{ session.project.name }}

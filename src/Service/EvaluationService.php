@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Entity\Evaluation;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Security;
 
 /**
  * Class EvaluationService.
@@ -18,11 +19,17 @@ class EvaluationService
     private $manager;
 
     /**
+     * @var Security
+     */
+    private $security;
+
+    /**
      * EvaluationService constructor.
      */
-    public function __construct(EntityManagerInterface $manager)
+    public function __construct(EntityManagerInterface $manager, Security $security)
     {
         $this->manager = $manager;
+        $this->security = $security;
     }
 
     /**
@@ -34,19 +41,13 @@ class EvaluationService
 
         $evaluation->setRate($project ? $project->getRate() : 0);
 
-        if ($project) {
-            $project->addEvaluation($evaluation);
-        }
+        $evaluation->setUser($this->security->getUser());
 
         return $evaluation;
     }
 
     public function delete(Evaluation $evaluation): void
     {
-        if ($project = $evaluation->getProject()) {
-            $project->removeEvaluation($evaluation);
-        }
-
         $this->manager->remove($evaluation);
     }
 }

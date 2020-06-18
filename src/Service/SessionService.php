@@ -8,6 +8,7 @@ use App\Entity\Session;
 use App\Entity\Student;
 use DateInterval;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Security;
 
 /**
  * Class SessionService.
@@ -20,11 +21,17 @@ class SessionService
     private $manager;
 
     /**
+     * @var Security
+     */
+    private $security;
+
+    /**
      * SessionService constructor.
      */
-    public function __construct(EntityManagerInterface $manager)
+    public function __construct(EntityManagerInterface $manager, Security $security)
     {
         $this->manager = $manager;
+        $this->security = $security;
     }
 
     public function hydrate(Session $session): Session
@@ -40,7 +47,10 @@ class SessionService
             ;
         }
 
-        $session->setDuration($session->getDurationInterval());
+        $session
+            ->setUser($this->security->getUser())
+            ->setDuration($session->getDurationInterval())
+        ;
 
         return $session;
     }
@@ -58,6 +68,7 @@ class SessionService
             ->setDuration($isEvaluation ? new DateInterval(Session::EVALUATION_DURATION) : $session->getDurationInterval())
             ->setNoShow($isNoShow)
             ->setEvaluation($isEvaluation)
+            ->setUser($this->security->getUser())
         ;
 
         $student->addSession($session);

@@ -1,0 +1,49 @@
+{% extends 'admin.html.twig' %}
+
+{% block body %}
+    <h1 class="h3 mb-2 text-gray-800">Préférences</h1>
+
+    <div class="card shadow mb-4 border-bottom-primary">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Profil</h6>
+        </div>
+        <div class="card-body">
+            <p><b>Pseudo</b> : {{ user.username }}</p>
+            <p><b>Email</b> : {{ user.email }}</p>
+            <p><b>Nombre de mentoré·e·s</b> : {{ user.students|length }}</p>
+            <p><b>Nombre de parcours</b> : {{ user.paths|length }}</p>
+            <p><b>Nombre total de sessions</b> : {{ sessionsCount }}</p>
+            <p><b>Nombre total d'évaluations</b> : {{ evaluationsCount }}</p>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 border-bottom-warning">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-warning">Modifier mon profil</h6>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.username) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.oldPassword) }}
+            {{ form_row(form.newPassword) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="btn btn-primary">Modifier</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <div class="card shadow mb-4 border-bottom-danger">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-danger">Supprimer mon compte</h6>
+        </div>
+        <div class="card-body">
+            <p>La suppression de votre compte entraine la supression total de vos données (parcours, mentoré·e·s, sessions et évaluations).</p>
+            <p>Il n'est en aucun cas possible de revenir en arrière.</p>
+            <a href="{{ path('app_user_delete') }}" class="btn btn-danger"
+               onclick="return confirm('Êtes-vous certain de vouloir supprimer votre compte ?');">
+                Supprimer mon compte
+            </a>
+        </div>
+    </div>
+{% endblock %}

@@ -30,13 +30,13 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ path('app_path_read', {'idOC': path.idOC}) }}">
+                                    <a href="{{ path('app_path_read', {'id': path.id}) }}">
                                         {{ path.name }}
                                     </a>
                                 </td>
                                 <td>{{ path.projects|length }}</td>
                                 <td>
-                                    <a href="{{ path('app_path_delete', {'idOC': path.idOC }) }}" class="btn-circle btn-sm btn-danger"
+                                    <a href="{{ path('app_path_delete', {'id': path.id }) }}" class="btn-circle btn-sm btn-danger"
                                     onclick="return confirm('Êtes-vous certain de vouloir supprimer cet élément ?');">
                                         <i class="fas fa-trash"></i>
                                     </a>

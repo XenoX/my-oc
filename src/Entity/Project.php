@@ -6,8 +6,6 @@ namespace App\Entity;
 
 use App\Repository\ProjectRepository;
 use DateInterval;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -23,7 +21,7 @@ class Project
     private $id;
 
     /**
-     * @ORM\Column(type="integer", unique=true)
+     * @ORM\Column(type="integer")
      */
     private $idOC;
 
@@ -63,20 +61,10 @@ class Project
     private $link;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Path::class, mappedBy="projects")
+     * @ORM\ManyToOne(targetEntity=Path::class, inversedBy="projects")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $paths;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Evaluation::class, mappedBy="project", orphanRemoval=true)
-     */
-    private $evaluations;
-
-    public function __construct()
-    {
-        $this->paths = new ArrayCollection();
-        $this->evaluations = new ArrayCollection();
-    }
+    private $path;
 
     public function getId(): ?int
     {
@@ -179,61 +167,14 @@ class Project
         return $this;
     }
 
-    /**
-     * @return Collection|Path[]
-     */
-    public function getPaths(): Collection
+    public function getPath(): ?Path
     {
-        return $this->paths;
+        return $this->path;
     }
 
-    public function addPath(Path $path): self
+    public function setPath(?Path $path): self
     {
-        if (!$this->paths->contains($path)) {
-            $this->paths[] = $path;
-            $path->addProject($this);
-        }
-
-        return $this;
-    }
-
-    public function removePath(Path $path): self
-    {
-        if ($this->paths->contains($path)) {
-            $this->paths->removeElement($path);
-            $path->removeProject($this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Evaluation[]
-     */
-    public function getEvaluations(): Collection
-    {
-        return $this->evaluations;
-    }
-
-    public function addEvaluation(Evaluation $evaluation): self
-    {
-        if (!$this->evaluations->contains($evaluation)) {
-            $this->evaluations[] = $evaluation;
-            $evaluation->setProject($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEvaluation(Evaluation $evaluation): self
-    {
-        if ($this->evaluations->contains($evaluation)) {
-            $this->evaluations->removeElement($evaluation);
-            // set the owning side to null (unless already changed)
-            if ($evaluation->getProject() === $this) {
-                $evaluation->setProject(null);
-            }
-        }
+        $this->path = $path;
 
         return $this;
     }

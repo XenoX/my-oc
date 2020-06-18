@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Path;
 use App\Entity\Project;
 use App\Entity\Student;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
@@ -17,29 +18,35 @@ class StudentFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             PathFixtures::class,
+            UserFixtures::class,
         ];
     }
 
     public function load(ObjectManager $manager): void
     {
+        /** @var User $user */
+        $user = $this->getReference('user');
+
         foreach ($this->getData() as $data) {
             /** @var Path $path */
             $path = $this->getReference($data[4]);
             /** @var Project $project */
             $project = $this->getReference(self::PROJECT_IDS[array_rand(self::PROJECT_IDS)]);
 
-            $object = (new Student())
+            $student = (new Student())
                 ->setIdOC($data[0])
                 ->setName($data[1])
                 ->setEmail($data[2])
                 ->setFunded($data[3])
                 ->setPath($path)
                 ->setProject($project)
+                ->setUser($user)
             ;
 
-            $path->addStudent($object);
+            $path->addStudent($student);
+            $user->addStudent($student);
 
-            $manager->persist($object);
+            $manager->persist($student);
         }
 
         $manager->flush();

@@ -34,7 +34,7 @@
                                 <td>{{ student.email }}</td>
                                 <td>{{ student.funded ? 'Tiers' : 'Auto' }}</td>
                                 <td>
-                                    <a href="{{ path('app_path_read', {'idOC': student.path.idOC}) }}">
+                                    <a href="{{ path('app_path_read', {'id': student.path.id}) }}">
                                         {{ student.path.name }}
                                     </a>
                                 </td>

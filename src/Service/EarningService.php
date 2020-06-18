@@ -9,6 +9,7 @@ use App\Entity\Session;
 use App\Entity\Student;
 use App\Repository\EvaluationRepository;
 use App\Repository\StudentRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Class EarningService.
@@ -37,11 +38,12 @@ class EarningService
         $this->evaluationRepository = $evaluationRepository;
     }
 
-    public function getExpectedBonus(): float
+    public function getExpectedBonus(?UserInterface $user = null): float
     {
         $total = 0;
 
-        foreach ($this->studentRepository->findAll() as $student) {
+        $students = $user ? $this->studentRepository->findBy(['user' => $user]) : $this->studentRepository->findAll();
+        foreach ($students as $student) {
             if ($student->isFunded()) {
                 continue;
             }
@@ -63,15 +65,16 @@ class EarningService
         return (float) $totalEarning;
     }
 
-    public function getExpectedEarnsForMonth(string $yearAndMonth): float
+    public function getExpectedEarnsForMonth(string $yearAndMonth, ?UserInterface $user = null): float
     {
         $totalEarning = 0;
 
-        foreach ($this->studentRepository->findAll() as $student) {
+        $students = $user ? $this->studentRepository->findBy(['user' => $user]) : $this->studentRepository->findAll();
+        foreach ($students as $student) {
             $totalEarning += $this->getExpectedTotalEarnsForStudent($yearAndMonth, $student);
         }
 
-        foreach ($this->evaluationRepository->findByMonth($yearAndMonth) as $evaluation) {
+        foreach ($this->evaluationRepository->findByMonth($yearAndMonth, $user) as $evaluation) {
             $totalEarning += $this->getEarnsForMeeting($evaluation);
         }
 
