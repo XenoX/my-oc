@@ -35,8 +35,8 @@ Go to `.env.local` file and set :
 
 ```bash
 DATABASE_URL # Generally change only db_user, db_password and db_name
-OAUTH_OC_CLIENT_ID # On OC website (logged), type App.api.anonymous.client_id on console
-OAUTH_OC_CLIENT_SECRET # On OC website (logged), type App.api.anonymous.client_secret on console
+OAUTH_OC_CLIENT_ID # On OC website (logged), type App.preferences.openclassrooms.api.anonymous.client_id on console
+OAUTH_OC_CLIENT_SECRET # On OC website (logged), type App.preferences.openclassrooms.api.anonymous.client_secret on console
 ```
 
 #### Set up database
