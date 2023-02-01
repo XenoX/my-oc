@@ -22,7 +22,7 @@
         "symfony/notifier": "5.3.*",
         "symfony/orm-pack": "*",
         "symfony/process": "5.3.*",
-        "symfony/security-bundle": "5.3.*",
+        "symfony/security-bundle": "5.4.*",
         "symfony/serializer-pack": "*",
         "symfony/string": "5.3.*",
         "symfony/translation": "5.3.*",
